@@ -14,23 +14,23 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.2,
       "position": [
-        2688,
-        80
+        -1072,
+        240
       ],
       "webhookId": "5b016aab-de57-47b1-aa55-6d469863597e"
     },
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const iso = (value) => {\n  if (typeof value !== 'string') return null;\n  const p = /^(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2}):(\\d{2}):(\\d{2})(?:\\.\\d{1,3})?(Z|[+-]\\d{2}:\\d{2})$/.exec(value);\n  if (!p) return null;\n  const [, year, month, day, hh, mm, ss] = p;\n  const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);\n  const days = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];\n  if (!(+year >= 2000 && +day >= 1 && +day <= days[+month - 1]) || +hh > 23 || +mm > 59 || +ss > 59) return null;\n  const time = Date.parse(value);\n  return Number.isFinite(time) ? new Date(time).toISOString() : null;\n};\nconst validEmail = (value) => typeof value === 'string' && value.length <= 254 && /^[A-Za-z0-9.!#$%&'*+/=?^_{|}~-]+@[A-Za-z0-9-]+(?:\\.[A-Za-z0-9-]+)+$/.test(value);\nconst bad = (error) => ({json: {error}});\nconst body = $json.body;\nif (!body || typeof body !== 'object' || Array.isArray(body)) return bad('JSON 객체가 필요합니다.');\nconst {action, scope, actor, mayApprove, id, version} = body;\nconst validScope = typeof scope === 'string' && /^(?:(?:user|org):[A-Za-z0-9_-]{1,120}|gmail:inbox)$/.test(scope);\nif (!validScope || typeof actor !== 'string' || !/^[A-Za-z0-9_-]{1,120}$/.test(actor) || typeof mayApprove !== 'boolean') {\n  return bad('인증된 사이트 세션 정보가 필요합니다.');\n}\nif (!['submit', 'list', 'get', 'approve', 'reject', 'revise'].includes(action)) return bad('지원하지 않는 요청입니다.');\nconst input = {action, scope, actor, mayApprove};\nif (action === 'list') return {json: input};\nif (action !== 'submit') {\n  if (typeof id !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) return bad('잘못된 업무 ID입니다.');\n  input.id = id;\n  if (action === 'get') return {json: input};\n  if (!Number.isInteger(version) || version < 1 || version > 2147483647) return bad('초안 버전 번호가 필요합니다.');\n  input.version = version;\n  if (action === 'reject' || action === 'revise') {\n    if (typeof body.feedback !== 'string' || body.feedback.includes('\\0') || body.feedback.length > 2000 || (action === 'revise' && !body.feedback.trim())) return bad('반려·수정 의견을 확인해 주세요.');\n    input.feedback = body.feedback.trim();\n  }\n  return {json: input};\n}\nconst {requestKey, kind, title, prompt, context, preferences, to, start, end, runAfter} = body;\nif (typeof requestKey !== 'string' || !/^[A-Za-z0-9_-]{1,100}$/.test(requestKey)) return bad('유효한 요청 키가 필요합니다.');\nif (!['mail', 'document', 'calendar'].includes(kind)) return bad('업무 유형을 선택해 주세요.');\nconst text = (s, n) => typeof s === 'string' && !s.includes('\\0') && s.length <= n;\nif (!text(title, 200) || !title.trim() || /[\\r\\n]/.test(title) || !text(prompt, 5000) || !prompt.trim() ||\n    !text(context ?? '', 16000) || !text(preferences ?? '', 2000)) return bad('제목, 요청 내용 또는 참고 자료를 확인해 주세요.');\nconst request = {title: title.trim(), prompt: prompt.trim(), context: (context ?? '').trim(), preferences: (preferences ?? '').trim()};\nif (kind === 'mail') {\n  if (!validEmail(to)) return bad('메일 수신자 주소 하나가 필요합니다.');\n  request.to = to;\n}\nif (kind === 'calendar') {\n  request.start = iso(start);\n  request.end = iso(end);\n  if (!request.start || !request.end || request.end <= request.start) return bad('시간대가 포함된 일정 시작·종료 시각이 필요합니다.');\n}\nif (runAfter != null) {\n  input.runAfter = iso(runAfter);\n  if (!input.runAfter) return bad('시간대가 포함된 예약 시각이 필요합니다.');\n  request.runAfter = input.runAfter;\n}\nreturn {json: {...input, key: requestKey, kind, request}};"
+        "jsCode": "const iso = (value) => {\n  if (typeof value !== 'string') return null;\n  const p = /^(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2}):(\\d{2}):(\\d{2})(?:\\.\\d{1,3})?(Z|[+-]\\d{2}:\\d{2})$/.exec(value);\n  if (!p) return null;\n  const [, year, month, day, hh, mm, ss] = p;\n  const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);\n  const days = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];\n  if (!(+year >= 2000 && +day >= 1 && +day <= days[+month - 1]) || +hh > 23 || +mm > 59 || +ss > 59) return null;\n  const time = Date.parse(value);\n  return Number.isFinite(time) ? new Date(time).toISOString() : null;\n};\nconst validEmail = (value) => typeof value === 'string' && value.length <= 254 && /^[A-Za-z0-9.!#$%&'*+/=?^_{|}~-]+@[A-Za-z0-9-]+(?:\\.[A-Za-z0-9-]+)+$/.test(value);\nconst bad = (error) => ({json: {error}});\nconst body = $json.body;\nif (!body || typeof body !== 'object' || Array.isArray(body)) return bad('JSON 객체가 필요합니다.');\nconst {action, scope, actor, mayApprove, id, version} = body;\nconst validScope = typeof scope === 'string' && /^(?:(?:user|org):[A-Za-z0-9_-]{1,120}|gmail:inbox)$/.test(scope);\nif (!validScope || typeof actor !== 'string' || !/^[A-Za-z0-9_-]{1,120}$/.test(actor) || typeof mayApprove !== 'boolean') {\n  return bad('인증된 사이트 세션 정보가 필요합니다.');\n}\nif (!['submit', 'list', 'get', 'approve', 'reject', 'revise', 'get_settings', 'save_settings', 'retry_execution'].includes(action)) return bad('지원하지 않는 요청입니다.');\nconst input = {action, scope, actor, mayApprove};\nif (action === 'list' || action === 'get_settings') return {json: input};\nif (action === 'save_settings') {\n  if (typeof body.preferences !== 'string' || body.preferences.includes('\\0') || body.preferences.length > 2000) {\n    return bad('사용자 설정은 2,000자 이하로 입력해 주세요.');\n  }\n  return {json: {...input, preferences: body.preferences.trim()}};\n}\nif (action !== 'submit') {\n  if (typeof id !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) return bad('잘못된 업무 ID입니다.');\n  input.id = id;\n  if (action === 'get') return {json: input};\n  if (!Number.isInteger(version) || version < 1 || version > 2147483647) return bad('초안 버전 번호가 필요합니다.');\n  input.version = version;\n  if (action === 'reject' || action === 'revise') {\n    if (typeof body.feedback !== 'string' || body.feedback.includes('\\0') || body.feedback.length > 2000 || (action === 'revise' && !body.feedback.trim())) return bad('반려·수정 의견을 확인해 주세요.');\n    input.feedback = body.feedback.trim();\n  }\n  return {json: input};\n}\nconst {requestKey, kind, title, prompt, context, preferences, to, start, end, runAfter} = body;\nif (typeof requestKey !== 'string' || !/^[A-Za-z0-9_-]{1,100}$/.test(requestKey)) return bad('유효한 요청 키가 필요합니다.');\nif (!['mail', 'document', 'calendar'].includes(kind)) return bad('업무 유형을 선택해 주세요.');\nconst text = (s, n) => typeof s === 'string' && !s.includes('\\0') && s.length <= n;\nif (!text(title, 200) || !title.trim() || /[\\r\\n]/.test(title) || !text(prompt, 5000) || !prompt.trim() ||\n    !text(context ?? '', 16000) || !text(preferences ?? '', 2000)) return bad('제목, 요청 내용 또는 참고 자료를 확인해 주세요.');\nconst request = {title: title.trim(), prompt: prompt.trim(), context: (context ?? '').trim(), preferences: (preferences ?? '').trim()};\nif (kind === 'mail') {\n  if (!validEmail(to)) return bad('메일 수신자 주소 하나가 필요합니다.');\n  request.to = to;\n}\nif (kind === 'calendar') {\n  request.start = iso(start);\n  request.end = iso(end);\n  if (!request.start || !request.end || request.end <= request.start) return bad('시간대가 포함된 일정 시작·종료 시각이 필요합니다.');\n}\nif (runAfter != null) {\n  input.runAfter = iso(runAfter);\n  if (!input.runAfter) return bad('시간대가 포함된 예약 시각이 필요합니다.');\n  request.runAfter = input.runAfter;\n}\nreturn {json: {...input, key: requestKey, kind, request}};"
       },
       "id": "9af473ff-ab44-413b-9dfe-b33080580d74",
       "name": "요청·권한 검증",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2176,
-        352
+        928,
+        416
       ]
     },
     {
@@ -47,9 +47,13 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.8,
       "position": [
-        2848,
-        352
-      ]
+        928,
+        592
+      ],
+      "onError": "continueErrorOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000
     },
     {
       "parameters": {
@@ -72,8 +76,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        3072,
-        352
+        784,
+        784
       ]
     },
     {
@@ -99,8 +103,8 @@
       "type": "n8n-nodes-base.gmailTrigger",
       "typeVersion": 1.4,
       "position": [
-        2928,
-        80
+        -1072,
+        736
       ]
     },
     {
@@ -113,8 +117,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2928,
-        272
+        1168,
+        416
       ]
     },
     {
@@ -131,9 +135,12 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.8,
       "position": [
-        2928,
-        464
-      ]
+        1168,
+        592
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000
     },
     {
       "parameters": {
@@ -151,14 +158,14 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.4,
       "position": [
-        3168,
-        80
+        -1072,
+        2048
       ]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT * FROM orbit_n8n.claim($1::text)",
+        "query": "SELECT job.*, settings.preferences AS stored_preferences, manuscript.approved_payload AS archived_payload\nFROM orbit_n8n.claim($1::text) AS job\nLEFT JOIN orbit_n8n.scope_settings AS settings ON settings.scope = job.scope\nLEFT JOIN orbit_n8n.manuscripts AS manuscript\n  ON manuscript.job_id = job.id AND manuscript.version = job.draft_version",
         "options": {
           "queryBatching": "independently",
           "queryReplacement": "={{ [$execution.id] }}"
@@ -169,8 +176,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.8,
       "position": [
-        544,
-        192
+        1536,
+        416
       ]
     },
     {
@@ -232,36 +239,36 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.5,
       "position": [
-        608,
-        384
+        1536,
+        608
       ]
     },
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const {preferences, reference, ...job} = $json;\nreturn {json: {...job, request: reference, preferences}};"
+        "jsCode": "const {preferences, storedPreferences, reference, ...job} = $json;\nreturn {json: {...job, request: reference, preferences: preferences || storedPreferences}};"
       },
       "id": "c3fa50a5-d2dc-4567-9698-b0bd2104a909",
       "name": "사용자 설정·업무 문맥 구성",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        368,
-        1152
+        336,
+        1424
       ]
     },
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const {id, source, kind, draft, review} = $json;\nif ($json.state !== 'executing' || !draft || review?.passed !== true) throw new Error('승인된 검수 원고가 없습니다.');\nconst route = kind === 'mail' ? (source === 'gmail' ? 'reply' : 'send') : kind;\nreturn {json: {id, route, draft}};"
+        "jsCode": "const {id, source, kind, archived_payload: draft} = $json;\nif ($json.state !== 'executing' || !$json.decision_by || !draft || $json.review?.passed !== true) {\n  throw new Error('승인된 검수 원고가 없습니다.');\n}\nconst route = kind === 'mail' ? (source === 'gmail' ? 'reply' : 'send') : kind;\nconst validEmail = (value) => typeof value === 'string' && value.length <= 254 && /^[A-Za-z0-9.!#$%&'*+/=?^_{|}~-]+@[A-Za-z0-9-]+(?:\\.[A-Za-z0-9-]+)+$/.test(value);\nif (kind === 'mail' && (!validEmail(draft.to) || (route === 'reply' && !/^[A-Za-z0-9_-]{1,150}$/.test(draft.messageId ?? '')))) {\n  throw new Error('승인된 메일 수신자 또는 원본 메시지가 유효하지 않습니다.');\n}\nreturn {json: {id, route, draft}};"
       },
       "id": "97aaee6c-17c9-4b06-b2ec-ff02ae4f410c",
       "name": "승인된 원고·대상 확정",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        272,
-        2512
+        1424,
+        2464
       ],
       "onError": "continueErrorOutput"
     },
@@ -292,8 +299,8 @@
       "type": "@n8n/n8n-nodes-langchain.googleGemini",
       "typeVersion": 1.2,
       "position": [
-        464,
-        1328
+        560,
+        1424
       ],
       "onError": "continueErrorOutput"
     },
@@ -307,8 +314,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        912,
-        1680
+        1712,
+        1184
       ]
     },
     {
@@ -321,8 +328,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        576,
-        1488
+        912,
+        1504
       ]
     },
     {
@@ -384,8 +391,8 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.5,
       "position": [
-        736,
-        1488
+        1136,
+        1504
       ]
     },
     {
@@ -415,8 +422,8 @@
       "type": "@n8n/n8n-nodes-langchain.googleGemini",
       "typeVersion": 1.2,
       "position": [
-        384,
-        1680
+        1360,
+        1344
       ],
       "onError": "continueErrorOutput"
     },
@@ -430,8 +437,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        496,
-        1840
+        1712,
+        1392
       ]
     },
     {
@@ -448,9 +455,12 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.8,
       "position": [
-        400,
-        3392
-      ]
+        2832,
+        2384
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000
     },
     {
       "parameters": {
@@ -557,8 +567,8 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.5,
       "position": [
-        80,
-        2688
+        1712,
+        2512
       ]
     },
     {
@@ -576,8 +586,8 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        -944,
-        2928
+        1936,
+        2288
       ],
       "webhookId": "62ef79f6-8456-4c75-a907-cf1a1a27b3b8",
       "onError": "continueErrorOutput"
@@ -598,8 +608,8 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        -720,
-        2928
+        1936,
+        2480
       ],
       "webhookId": "4d6d08e3-573e-4095-8ee4-b98e9c265a67",
       "onError": "continueErrorOutput"
@@ -636,8 +646,8 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        -496,
-        2928
+        1936,
+        2672
       ],
       "onError": "continueErrorOutput"
     },
@@ -663,8 +673,8 @@
       "type": "n8n-nodes-base.googleCalendar",
       "typeVersion": 1.4,
       "position": [
-        -48,
-        2928
+        1936,
+        2864
       ],
       "onError": "continueErrorOutput"
     },
@@ -678,8 +688,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        240,
-        3136
+        2608,
+        2688
       ]
     },
     {
@@ -694,8 +704,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -128,
-        688
+        -496,
+        1600
       ]
     },
     {
@@ -710,8 +720,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1024,
-        2848
+        1424,
+        2800
       ]
     },
     {
@@ -726,8 +736,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        288,
-        3296
+        2208,
+        1856
       ]
     },
     {
@@ -815,8 +825,8 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.5,
       "position": [
-        272,
-        576
+        -336,
+        1424
       ]
     },
     {
@@ -829,8 +839,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -48,
-        768
+        -112,
+        1184
       ]
     },
     {
@@ -843,8 +853,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        256,
-        768
+        -112,
+        1408
       ]
     },
     {
@@ -857,22 +867,22 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        560,
-        768
+        -112,
+        1664
       ]
     },
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const {title, prompt, context, preferences} = $json.request;\nreturn {json: {\n  kind: $json.kind, source: $json.source, version: $json.draft_version,\n  task: $json.task, feedback: $json.feedback,\n  reference: {title, prompt, context: context ?? '', ...$json.taskDetails},\n  preferences: preferences ?? ''\n}};"
+        "jsCode": "const {title, prompt, context, preferences} = $json.request;\nreturn {json: {\n  kind: $json.kind, source: $json.source, version: $json.draft_version,\n  task: $json.task, feedback: $json.feedback,\n  reference: {title, prompt, context: context ?? '', ...$json.taskDetails},\n  preferences: preferences ?? '', storedPreferences: $json.stored_preferences ?? ''\n}};"
       },
       "id": "650f0620-5d49-446b-98e1-421cf558fe26",
       "name": "필요 정보 수집",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        272,
-        976
+        112,
+        1424
       ]
     },
     {
@@ -885,8 +895,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        720,
-        768
+        1936,
+        1808
       ]
     },
     {
@@ -951,22 +961,22 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.5,
       "position": [
-        608,
-        2016
+        1936,
+        1376
       ]
     },
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const job = $(\"실행 대기열 확보\").first().json;\nconst base = {id: job.id, runId: String($execution.id)};\nif ($json.outcome) return {json: {...$json, ...base}};\nif (job.state === 'generating') return {json: {...base, outcome: 'generation_error', error: 'generation_step_failed'}};\nreturn {json: {...base, outcome: 'execution_uncertain', error: 'provider_error_check_before_resubmitting'}};"
+        "jsCode": "const job = $(\"실행 대기열 확보\").first().json;\nconst base = {id: job.id, runId: String($execution.id)};\nif ($json.outcome) return {json: {...$json, ...base}};\nif (job.state === 'generating') return {json: {...base, outcome:'generation_error', error:'generation_step_failed'}};\nif (['승인된 원고·대상 확정', '사용자 최종 승인 확인'].includes($prevNode.name)) {\n  return {json:{...base, outcome:'execution_failed', error:'approved_payload_invalid'}};\n}\nconst failure = $json.error;\nconst status = Number(failure?.httpCode ?? failure?.statusCode ?? failure?.response?.status ?? $json.httpCode ?? $json.statusCode);\nif (status === 429) return {json:{...base, outcome:'execution_retry', error:'provider_rate_limited'}};\nif ([400, 401, 403, 404, 422].includes(status)) {\n  return {json:{...base, outcome:'execution_failed', error:'provider_rejected_' + status}};\n}\nreturn {json:{...base, outcome:'execution_uncertain', error:'provider_outcome_unconfirmed'}};"
       },
       "id": "93d8b25c-3ca8-450c-bd40-642f1d73015c",
       "name": "오류 처리·재시도",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        720,
-        3392
+        2160,
+        1568
       ]
     },
     {
@@ -979,8 +989,8 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        -272,
-        2928
+        2160,
+        2672
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -997,8 +1007,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -272,
-        3104
+        2384,
+        2672
       ]
     },
     {
@@ -1056,8 +1066,8 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.5,
       "position": [
-        384,
-        2336
+        1136,
+        2384
       ]
     },
     {
@@ -1074,9 +1084,12 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.8,
       "position": [
-        496,
-        2176
-      ]
+        2160,
+        1840
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000
     },
     {
       "parameters": {
@@ -1140,8 +1153,8 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.5,
       "position": [
-        2400,
-        336
+        656,
+        416
       ]
     },
     {
@@ -1154,24 +1167,114 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2624,
-        272
+        -336,
+        192
       ]
+    },
+    {
+      "id": "1ed4af09-eabe-4d50-8acf-a6cfd8a84448",
+      "name": "Webhook · Gmail · Schedule Trigger",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.5,
+      "position": [
+        1168,
+        240
+      ],
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $prevNode.name }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "AI 비서 사이트 요청"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "사이트"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $prevNode.name }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "라벨이 붙은 Gmail 수신"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Gmail"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $prevNode.name }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "매분 예약·승인 대기열 확인"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "예약·정기 실행"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "df4123d1-35b4-4b1b-8da7-d332e2495160",
+      "name": "사이트 접수 오류 반환",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        624
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return {json:{reply:{statusCode:503,error:'업무 저장소에 연결할 수 없습니다. 같은 요청 키로 다시 시도해 주세요.'}}};"
+      }
     }
   ],
   "pinData": {},
   "connections": {
-    "AI 비서 사이트 요청": {
-      "main": [
-        [
-          {
-            "node": "요청·권한 검증",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "사이트 요청 처리": {
       "main": [
         [
@@ -1180,14 +1283,10 @@
             "type": "main",
             "index": 0
           }
-        ]
-      ]
-    },
-    "라벨이 붙은 Gmail 수신": {
-      "main": [
+        ],
         [
           {
-            "node": "수신 메일 등록값 구성",
+            "node": "사이트 접수 오류 반환",
             "type": "main",
             "index": 0
           }
@@ -1199,17 +1298,6 @@
         [
           {
             "node": "수신 메일 중복 확인·저장",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "매분 예약·승인 대기열 확인": {
-      "main": [
-        [
-          {
-            "node": "실행 대기열 확보",
             "type": "main",
             "index": 0
           }
@@ -1692,6 +1780,75 @@
           }
         ]
       ]
+    },
+    "AI 비서 사이트 요청": {
+      "main": [
+        [
+          {
+            "node": "Webhook · Gmail · Schedule Trigger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook · Gmail · Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "요청·권한 검증",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "수신 메일 등록값 구성",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "실행 대기열 확보",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "라벨이 붙은 Gmail 수신": {
+      "main": [
+        [
+          {
+            "node": "Webhook · Gmail · Schedule Trigger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "매분 예약·승인 대기열 확인": {
+      "main": [
+        [
+          {
+            "node": "Webhook · Gmail · Schedule Trigger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "사이트 접수 오류 반환": {
+      "main": [
+        [
+          {
+            "node": "오르빗에 상태 반환",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -1715,7 +1872,8 @@
         "597a643b-be83-4243-b791-312f03fdd694",
         "8b1d7018-489d-4815-9e31-9a72081d1f6d",
         "9174de5c-9721-47ba-b216-38f1b4c55ad8",
-        "007c21b1-8b29-4fe2-b074-c929b0e6328c"
+        "007c21b1-8b29-4fe2-b074-c929b0e6328c",
+        "df4123d1-35b4-4b1b-8da7-d332e2495160"
       ]
     },
     {
